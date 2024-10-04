@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Analizador de Código Java</title>
+    <!-- Enlace al archivo CSS -->
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/styles.css') }}">
+</head>
+<body>
+    <div class="contenedor">
+        <h1>Analizador de Código Java</h1>
+        
+        <!-- Contenedor para el formulario y la tabla de análisis sintáctico -->
+        <div class="form-tabla-contenedor">
+            <!-- Formulario para ingresar el código -->
+            <form method="POST" class="formulario">
+                <textarea name="code" class="code-input" placeholder="Ingrese su código Java aquí...">{{ request.form['code'] if request.form.get('code') else '' }}</textarea>
+                <button type="submit" class="analyze-button">Analizar</button>
+            </form>
+        
+            <!-- Tabla de análisis sintáctico -->
+            {% if sintactic_tokens %}
+            <div class="contenedor_tabla">
+                <h2>Tokens del Análisis Sintáctico</h2>
+                <table id="tokensTableSintactico">
+                    <thead>
+                        <tr>
+                            <th>Token</th>
+                            <th>PR</th>
+                            <th>ID</th>
+                            <th>CAD</th>
+                            <th>NUM</th>
+                            <th>SÍM</th>
+                            <th>TIPO</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for token in sintactic_tokens %}
+                        <tr>
+                            <td>{{ token.token }}</td>
+                            <td>{{ token.PR }}</td>
+                            <td>{{ token.ID }}</td>
+                            <td>{{ token.CAD }}</td>
+                            <td>{{ token.NUM }}</td>
+                            <td>{{ token.SÍM }}</td>
+                            <td>{{ token.TIPO }}</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            {% endif %}
+        </div>
+        
+
+        <!-- Mostrar errores si los hay -->
+        {% if error %}
+        <div class="syntax-error">{{ error }}</div>
+        {% endif %}
+
+        <!-- Tabla de análisis léxico -->
+        <div class="contenedor_tabla">
+            {% if tokens %}
+            <h2>Tokens del Análisis Léxico</h2>
+            <table id="tokensTableLexico">
+                <thead>
+                    <tr>
+                        <th>Token</th>
+                        <th>Lexema</th>
+                        <th>Número de Línea</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for token in tokens %}
+                    <tr>
+                        <td>{{ token.token }}</td>
+                        <td>{{ token.lexema }}</td>
+                        <td>{{ token.linea }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+            {% endif %}
+        </div>
+    </div>
+</body>
+</html>

@@ -1,0 +1,87 @@
+body {
+  font-family: Arial, sans-serif;
+  background-color: #1e1e1e;
+  color: #ffffff;
+  margin: 0;
+  padding: 20px;
+}
+
+.contenedor {
+  max-width: 800px;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.form-tabla-contenedor {
+  display: flex; /* Mostrar el formulario y la tabla en fila */
+  gap: 20px; /* Espaciado entre el formulario y la tabla */
+}
+
+.formulario {
+  height: 500px; /* Altura fija para el formulario */
+  flex: 1; /* Asegura que el formulario y la tabla ocupen el mismo espacio */
+}
+
+.contenedor_tabla {
+  height: 500px; /* Altura fija para la tabla */
+  flex: 1; /* Asegura que el formulario y la tabla ocupen el mismo espacio */
+  overflow-y: auto; /* Agrega desplazamiento vertical si el contenido excede la altura */
+  background-color: #2d2d2d;
+  padding: 20px;
+  border-radius: 5px;
+}
+
+.code-input {
+  width: 100%;
+  height: calc(100% - 50px); /* Ajusta la altura del textarea según el botón */
+  background-color: #2d2d2d;
+  color: #fff;
+  border: none;
+  padding: 10px;
+  font-family: monospace;
+  font-size: 16px;
+  border-radius: 5px;
+  resize: none; /* Desactiva el redimensionamiento manual del textarea */
+}
+
+.analyze-button {
+  padding: 10px 20px;
+  background-color: #007bff;
+  color: #fff;
+  border: none;
+  cursor: pointer;
+  border-radius: 5px;
+}
+
+.analyze-button:hover {
+  background-color: #0056b3;
+}
+
+.syntax-error {
+  color: red;
+  font-weight: bold;
+  margin-top: 10px;
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 10px;
+}
+
+th, td {
+  padding: 10px;
+  border: 1px solid #444;
+}
+
+th {
+  background-color: #444;
+  color: #ffffff; /* Texto en blanco para mejor contraste */
+}
+
+td {
+  background-color: #2d2d2d;
+  text-align: left; /* Alinear el texto a la izquierda para mejor legibilidad */
+}
