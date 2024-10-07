@@ -5,149 +5,186 @@ from flask import Flask, render_template, request
 app = Flask(__name__)
 
 # Lista de tokens
-tokens = (
-    'FOR', 'INT', 'IDENTIFIER', 'NUMBER', 'LESS_EQUAL', 'PLUS', 'PLUS_PLUS',
-    'EQUALS', 'LPAREN', 'RPAREN', 'LBRACE', 'RBRACE', 'SEMICOLON',
-    'SYSTEM', 'OUT', 'PRINTLN', 'STRING', 'DOT', 'MENOS'
-)
+tokens = ['PROGRAMA', 'INT', 'READ', 'PRINTF', 'END', 'SUMA', 'LPAREN', 
+          'RPAREN', 'LBRACE', 'RBRACE', 'COMA', 'SEMICOLON', 'ADICION', 
+          'IGUAL', 'IDENTIFICADOR', 'VARIABLE', 'CADENA']
+
+reservada = {
+    "programa": "PROGRAMA",
+    "int": "INT",
+    "read": "READ",
+    "printf": "PRINTF",
+    "end": "END"
+}
+
+simbolo = {
+    "(": "LPAREN",
+    ")": "RPAREN",
+    "{": "LBRACE", 
+    "}": "RBRACE",
+    ",": "COMA",
+    ";": "SEMICOLON",
+    "+": "ADICION",
+    "=": "IGUAL"
+}
 
 # Reglas de expresión regular para los tokens simples
-t_LESS_EQUAL = r'<='
-t_PLUS = r'\+'
-t_PLUS_PLUS = r'\+\+'
-t_EQUALS = r'='
-t_LPAREN = r'\('
-t_RPAREN = r'\)'
+t_LPAREN  = r'\('
+t_RPAREN  = r'\)'
 t_LBRACE = r'\{'
 t_RBRACE = r'\}'
+t_COMA = r'\,'
 t_SEMICOLON = r';'
-t_DOT = r'\.'
-t_MENOS = r'\-'
+t_ADICION = r'\+'
+t_IGUAL = r'='
 
-# Definición de palabras clave
-def t_FOR(t):
-    r'for'
-    return t
-
-def t_INT(t):
-    r'int'
-    return t
-
-def t_SYSTEM(t):
-    r'System'  # Debe reconocer "System" con mayúscula
-    return t
-
-def t_OUT(t):
-    r'out'
-    return t
-
-def t_PRINTLN(t):
-    r'println'
-    return t
-
-# Identificador y número
-def t_IDENTIFIER(t):
+# Definición de palabras clave y variables
+def t_IDENTIFICADOR(t):
     r'[a-zA-Z_][a-zA-Z_0-9]*'
+    t.type = reservada.get(t.value, 'IDENTIFICADOR')
     return t
 
-def t_NUMBER(t):
-    r'\d+'
-    t.value = int(t.value)
-    return t
-
-def t_STRING(t):
+def t_CADENA(t):
     r'"[^"]*"'
     return t
 
-# Manejo de saltos de línea, incrementando el número de línea correctamente
 def t_newline(t):
     r'\n+'
     t.lexer.lineno += len(t.value)
 
-# Ignorar espacios y tabulaciones
-t_ignore = ' \t'
+t_ignore  = ' \t'
 
-# Reporte de errores de caracteres ilegales
 def t_error(t):
-    print(f"Carácter ilegal '{t.value[0]}' en la línea {t.lexer.lineno}")
+    print("Illegal character '%s'" % t.value[0])
     t.lexer.skip(1)
 
 lexer = lex.lex()
 
 # Definición del parser (sintaxis)
-def p_program(p):
-    'program : for_loop'
+errors = []
+variables_declaradas = set()
+
+def p_funcion(p):
+    '''funcion : PROGRAMA IDENTIFICADOR LPAREN RPAREN LBRACE estructura RBRACE'''
+    if not errors:
+        print("Ningún error sintáctico!")
+
+def p_estructura(p):
+    'estructura : variables entrada operacion impresion salida'
     pass
 
-def p_for_loop(p):
-    'for_loop : FOR LPAREN INT IDENTIFIER EQUALS NUMBER SEMICOLON IDENTIFIER LESS_EQUAL NUMBER SEMICOLON increment RPAREN LBRACE statement RBRACE'
-    pass
+def p_variables(p):
+    '''variables : INT IDENTIFICADOR COMA IDENTIFICADOR COMA IDENTIFICADOR SEMICOLON'''
+    global variables_declaradas
+    variables_declaradas.update([p[2], p[4], p[6]])
+    print("Variables correctamente declaradas ", variables_declaradas)
 
-def p_increment(p):
-    '''increment : IDENTIFIER PLUS_PLUS
-                 | IDENTIFIER PLUS EQUALS NUMBER'''
-    if len(p) == 3 and p[2] == '+':
-        raise SyntaxError(f"Error en la línea {p.lineno(2)}: '{p[1]}+' no está permitido. Use '{p[1]}++' o '{p[1]} += 1'.")
+def p_entrada(p):
+    '''entrada : lectura lectura'''
 
-def p_statement(p):
-    'statement : SYSTEM DOT OUT DOT PRINTLN LPAREN STRING PLUS IDENTIFIER RPAREN SEMICOLON'
-    pass
+def p_lectura(p):
+    '''lectura : READ IDENTIFICADOR SEMICOLON'''
+    if p[2] not in variables_declaradas:
+        errors.append(f"Error: Variable '{p[2]}' no declarada en la línea {p.lineno(2)}")
 
-# Manejo de errores del parser
+def p_operacion(p):
+    '''operacion : IDENTIFICADOR IGUAL IDENTIFICADOR ADICION IDENTIFICADOR SEMICOLON'''
+    if p[1] not in variables_declaradas:
+        errors.append(f"Error: Variable '{p[1]}' no declarada en la línea {p.lineno(1)}")
+    if p[3] not in variables_declaradas:
+        errors.append(f"Error: Variable '{p[3]}' no declarada en la línea {p.lineno(3)}")
+    if p[5] not in variables_declaradas:
+        errors.append(f"Error: Variable '{p[5]}' no declarada en la línea {p.lineno(5)}")
+
+def p_impresion(p):
+    '''impresion : PRINTF LPAREN CADENA RPAREN'''
+
+def p_salida(p):
+    '''salida : END SEMICOLON'''
+
 def p_error(p):
     if p:
-        raise SyntaxError(f"Error de sintaxis en la línea {p.lineno-2}, token '{p.value}'")
+        errors.append(f"Error de sintaxis en la línea {p.lineno}")
     else:
-        raise SyntaxError("Error de sintaxis al final del archivo")
+        errors.append("Error de sintaxis al final del archivo")
 
 parser = yacc.yacc()
 
 # Función para analizar el código
 def analyze_code(code):
+    global variables_declaradas, errors
+    variables_declaradas = set()  # Reiniciar variables declaradas
+    errors = []  # Reiniciar lista de errores
     tokens_list = []
     sintactic_list = []
-    lexer.lineno = 1  # Asegurar que la numeración comience en 1
+    lexer.lineno = 1  # Reiniciar el contador de líneas
     lexer.input(code)
+
+    # Diccionario para contar tokens por tipo
+    token_count = {
+        'PROGRAMA': 0,
+        'INT': 0,
+        'READ': 0,
+        'PRINTF': 0,
+        'END': 0,
+        'IDENTIFICADOR': 0,
+        'CADENA': 0,
+        'SÍMBOLOS': 0  # Para símbolos como +, =, etc.
+    }
 
     # Recopilar todos los tokens léxicos
     for token in lexer:
         tokens_list.append({"token": token.type, "lexema": str(token.value), "linea": token.lineno})
-        
+
         # Identificar el tipo de token para el análisis sintáctico
         token_type = {
-            'PR': 'X' if token.type in ['FOR', 'INT', 'SYSTEM', 'OUT', 'PRINTLN'] else '',
-            'ID': 'X' if token.type == 'IDENTIFIER' else '',
-            'NUM': 'X' if token.type == 'NUMBER' else '',
-            'SÍM': 'X' if token.type in ['PLUS', 'PLUS_PLUS', 'EQUALS', 'LESS_EQUAL', 'SEMICOLON', 'LPAREN', 'RPAREN'] else '',
-            'CAD': 'X' if token.type == 'STRING' else '',
-            'TIPO': ''  # Aquí podrías agregar más lógica si es necesario
+            'PR': 'X' if token.type in ['PROGRAMA', 'INT', 'READ', 'PRINTF', 'END'] else '',
+            'ID': 'X' if token.type == 'IDENTIFICADOR' else '',
+            'SÍM': 'X' if token.type in ['IGUAL', 'ADICION', 'SEMICOLON', 'COMA', 'RBRACE', 'LBRACE', 'RPAREN', 'LPAREN'] else '',
+            'CAD': 'X' if token.type == 'CADENA' else '',
+            'TIPO': ''  
         }
+
+        # Contar tokens por tipo
+        if token.type in ['PROGRAMA', 'INT', 'READ', 'PRINTF', 'END']:
+            token_count[token.type] += 1
+        elif token.type == 'IDENTIFICADOR':
+            token_count['IDENTIFICADOR'] += 1
+        elif token.type == 'CADENA':
+            token_count['CADENA'] += 1
+        else:
+            token_count['SÍMBOLOS'] += 1
+
         sintactic_list.append({
             "token": token.type,
             "lexema": str(token.value),
             **token_type
         })
 
-    syntax_error = None  # Inicializar la variable de error
+    syntax_error = None
     try:
         parser.parse(code, lexer=lexer)
     except SyntaxError as e:
-        syntax_error = str(e)  # Captura el mensaje de error
+        syntax_error = str(e)
 
-    return tokens_list, sintactic_list, syntax_error
+    if errors:
+        syntax_error = "\n".join(errors)
+
+    return tokens_list, sintactic_list, token_count, syntax_error
 
 # Rutas del servidor Flask
 @app.route('/', methods=['GET', 'POST'])
 def index():
     tokens = []
     sintactic_tokens = []
+    token_count = None
     error = None
 
     if request.method == 'POST':
         code = request.form['code']
-        tokens, sintactic_tokens, error = analyze_code(code)
+        tokens, sintactic_tokens, token_count, error = analyze_code(code)
 
-    return render_template('index.html', tokens=tokens, sintactic_tokens=sintactic_tokens, error=error)
+    return render_template('index.html', tokens=tokens, sintactic_tokens=sintactic_tokens, token_count=token_count, error=error)
 
 if __name__ == '__main__':
     app.run(debug=True)
