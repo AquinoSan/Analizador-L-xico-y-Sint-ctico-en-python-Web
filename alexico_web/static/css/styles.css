@@ -7,43 +7,58 @@ body {
 }
 
 .contenedor {
-  max-width: 800px;
+  max-width: 1200px;
   margin: 0 auto;
   display: flex;
   flex-direction: column;
   gap: 20px;
 }
 
+h1 {
+  font-size: 36px;
+  text-align: center;
+  margin-bottom: 20px;
+  color: #f1f1f1;
+}
+
 .form-tabla-contenedor {
-  display: flex; /* Mostrar el formulario y la tabla en fila */
-  gap: 20px; /* Espaciado entre el formulario y la tabla */
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
 }
 
 .formulario {
-  height: 500px; /* Altura fija para el formulario */
-  flex: 1; /* Asegura que el formulario y la tabla ocupen el mismo espacio */
+  flex: 1;
+}
+
+.tablas-contenedor {
+  display: flex;
+  gap: 20px;
+  justify-content: space-between;
 }
 
 .contenedor_tabla {
-  height: 500px; /* Altura fija para la tabla */
-  flex: 1; /* Asegura que el formulario y la tabla ocupen el mismo espacio */
-  overflow-y: auto; /* Agrega desplazamiento vertical si el contenido excede la altura */
+  flex: 1;
+  max-width: 48%;
+  height: 400px;
+  overflow-y: auto;
   background-color: #2d2d2d;
-  padding: 20px;
+  padding: 10px;
   border-radius: 5px;
 }
 
+/* Hacemos más grande el área para ingresar el código */
 .code-input {
   width: 100%;
-  height: calc(100% - 50px); /* Ajusta la altura del textarea según el botón */
+  height: 400px;
   background-color: #2d2d2d;
   color: #fff;
   border: none;
-  padding: 10px;
+  padding: 15px;
   font-family: monospace;
   font-size: 16px;
   border-radius: 5px;
-  resize: none; /* Desactiva el redimensionamiento manual del textarea */
+  resize: none;
 }
 
 .analyze-button {
@@ -53,12 +68,14 @@ body {
   border: none;
   cursor: pointer;
   border-radius: 5px;
+  margin-top: 10px;
 }
 
 .analyze-button:hover {
   background-color: #0056b3;
 }
 
+/* Estilo del mensaje de error debajo del botón */
 .syntax-error {
   color: red;
   font-weight: bold;
@@ -72,16 +89,16 @@ table {
 }
 
 th, td {
-  padding: 10px;
+  padding: 5px;
   border: 1px solid #444;
 }
 
 th {
   background-color: #444;
-  color: #ffffff; /* Texto en blanco para mejor contraste */
+  color: #ffffff;
 }
 
 td {
   background-color: #2d2d2d;
-  text-align: left; /* Alinear el texto a la izquierda para mejor legibilidad */
+  text-align: left;
 }
